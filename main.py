@@ -1,6 +1,7 @@
 from manager import TaskManager
 from observer import ConsoleListener
 from exceptions import TaskNotFoundError, InvalidTaskError
+from parser import is_valid_date
 
 manager = TaskManager()
 manager.events.subscribe(ConsoleListener())
@@ -32,6 +33,9 @@ def add_task():
     try:
         if t == "deadline":
             due = input("Due date (YYYY-MM-DD): ").strip()
+            if not is_valid_date(due):
+                print("Error: please use the YYYY-MM-DD format, e.g. 2026-12-02.")
+                return
             manager.create("deadline", title=title, deadline=due)
         elif t == "priority":
             p = input("Priority (low/medium/high/critical): ").strip()

@@ -1,0 +1,7 @@
+# Personal task data created when you run the app
+tasks.json
+
+# Python cache
+__pycache__/
+*.pyc
+.venv/
