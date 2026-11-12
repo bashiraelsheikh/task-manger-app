@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intelligent Task Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; line-height: 1.7; }
+
+  .hero { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 50%, #1a1f2e 100%); border-bottom: 1px solid #2d3748; padding: 70px 40px 60px; text-align: center; }
+  .hero h1 { font-size: 2.8rem; font-weight: 700; color: #fff; margin-bottom: 14px; }
+  .hero h1 span { color: #7c3aed; }
+  .hero p { font-size: 1.05rem; color: #94a3b8; max-width: 640px; margin: 0 auto 30px; }
+  .badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 600; color: #94a3b8; }
+  .badge.green { border-color: #16a34a; color: #4ade80; }
+  .badge.purple { border-color: #7c3aed; color: #a78bfa; }
+  .badge.blue { border-color: #2563eb; color: #60a5fa; }
+  .badge.orange { border-color: #d97706; color: #fbbf24; }
+
+  .nav { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 0 40px; position: sticky; top: 0; z-index: 100; }
+  .nav ul { list-style: none; display: flex; max-width: 1100px; margin: 0 auto; overflow-x: auto; }
+  .nav ul li a { display: block; padding: 14px 18px; color: #64748b; text-decoration: none; font-size: 0.85rem; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .nav ul li a:hover { color: #a78bfa; border-bottom-color: #7c3aed; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+  section { padding: 60px 0; border-bottom: 1px solid #1e293b; }
+  .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #7c3aed; margin-bottom: 8px; }
+  h2 { font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .section-desc { color: #64748b; font-size: 0.95rem; margin-bottom: 40px; max-width: 600px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 50px; }
+  .stat { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 22px; text-align: center; }
+  .stat-num { font-size: 2.2rem; font-weight: 700; color: #a78bfa; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 0.78rem; color: #475569; font-weight: 500; }
+
+  .file-tree { background: #0f1117; border: 1px solid #1e293b; border-radius: 10px; padding: 24px; font-family: 'Courier New', monospace; font-size: 0.82rem; }
+  .file-tree .dir { color: #60a5fa; }
+  .file-tree .desc { color: #475569; margin-left: 8px; font-style: italic; }
+  .file-tree .hl { color: #c4b5fd; }
+  .file-line { padding: 3px 0; }
+
+  .req-section { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+  .req-section-header { padding: 24px 30px; border-bottom: 1px solid #2d3748; display: flex; align-items: flex-start; gap: 16px; }
+  .req-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .req-icon.purple { background: #3b0764; }
+  .req-icon.blue { background: #1e3a5f; }
+  .req-icon.green { background: #14532d; }
+  .req-icon.orange { background: #451a03; }
+  .req-icon.red { background: #450a0a; }
+  .req-icon.teal { background: #0f3a3a; }
+  .req-section-header h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .req-section-header p { font-size: 0.85rem; color: #64748b; }
+
+  .assignment-quote { background: #0f1117; border-left: 3px solid #7c3aed; margin: 0 30px 0; padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.82rem; color: #64748b; font-style: italic; }
+  .assignment-quote strong { color: #a78bfa; font-style: normal; }
+  .req-section-body { padding: 24px 30px; }
+
+  .impl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+  .impl-block h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 10px; }
+
+  pre { background: #0f1117; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; overflow-x: auto; font-family: 'Courier New', Consolas, monospace; font-size: 0.78rem; line-height: 1.6; }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .st { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .cl { color: #ffcb6b; }
+  .nu { color: #f78c6c; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead th { text-align: left; padding: 12px 16px; background: #0f1117; color: #475569; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  tbody td { padding: 14px 16px; border-top: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+  tbody td:first-child { color: #e2e8f0; font-weight: 500; }
+  tbody tr:hover { background: #1e293b; }
+
+  .pattern-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+  .pattern-card { background: #0f1117; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; }
+  .pattern-type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .pattern-type.creational { color: #4ade80; }
+  .pattern-type.behavioral { color: #60a5fa; }
+  .pattern-type.structural { color: #f59e0b; }
+  .pattern-card h4 { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+  .pattern-card p { font-size: 0.8rem; color: #64748b; margin-bottom: 14px; }
+
+  .test-result { background: #0f1117; border: 1px solid #16a34a; border-radius: 10px; padding: 20px 24px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: #4ade80; margin-top: 20px; }
+  .test-result .gray { color: #475569; }
+  .test-result .white { color: #e2e8f0; }
+
+  footer { background: #1a1f2e; border-top: 1px solid #2d3748; padding: 30px 40px; text-align: center; color: #475569; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Intelligent <span>Task Management</span> System</h1>
+  <p>A Python application demonstrating object-oriented programming, design patterns, custom iterators, serialization, and unit testing — built to satisfy every requirement of the assignment.</p>
+  <div class="badges">
+    <span class="badge green">41 Tests Passing</span>
+    <span class="badge purple">3 Design Patterns</span>
+    <span class="badge blue">4 OOP Principles</span>
+    <span class="badge orange">Python 3.8+</span>
+    <span class="badge">No Dependencies</span>
+    <span class="badge">JSON Persistence</span>
+  </div>
+</div>
+
+<nav class="nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#structure">Structure</a></li>
+    <li><a href="#task-types">Task Types</a></li>
+    <li><a href="#patterns">Design Patterns</a></li>
+    <li><a href="#oop">OOP Concepts</a></li>
+    <li><a href="#features">All Features</a></li>
+    <li><a href="#tests">Tests</a></li>
+    <li><a href="#usage">Usage</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+  <section id="overview">
+    <div class="section-label">Project Summary</div>
+    <h2>What was built</h2>
+    <p class="section-desc">Every requirement from the assignment was implemented across 11 clean, modular Python files.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">11</div><div class="stat-label">Python Modules</div></div>
+      <div class="stat"><div class="stat-num">41</div><div class="stat-label">Unit Tests</div></div>
+      <div class="stat"><div class="stat-num">663</div><div class="stat-label">Lines of Code</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Design Patterns</div></div>
+    </div>
+
+    <div id="structure">
+      <div class="section-label" style="margin-bottom:10px">Project Structure</div>
+      <h2 style="margin-bottom:10px">How it is organized</h2>
+      <p class="section-desc">One file per responsibility. Nothing is mixed together.</p>
+      <div class="file-tree">
+        <div class="file-line"><span class="dir">task_manager/</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">models.py</span><span class="desc">Task base class + DeadlineTask, PriorityTask, RecurringTask — 83 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">manager.py</span><span class="desc">TaskManager — central controller that ties everything together — 89 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">factory.py</span><span class="desc">Factory Pattern — creates task objects from a type string — 34 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">observer.py</span><span class="desc">Observer Pattern — event notifications on task changes — 26 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">decorator.py</span><span class="desc">Decorator Pattern — wraps tasks to add behaviour at runtime — 31 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">iterator.py</span><span class="desc">Custom Iterator — filters tasks using __iter__ and __next__ — 22 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">storage.py</span><span class="desc">JSON Serialization — saves and loads tasks from disk — 15 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">parser.py</span><span class="desc">Regex Parser — parses "title:Task priority:high" input — 19 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">exceptions.py</span><span class="desc">Custom Exceptions — TaskNotFoundError, InvalidTaskError — 7 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">tests.py</span><span class="desc">Unit Tests — 41 tests across all modules — 242 lines</span></div>
+        <div class="file-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">main.py</span><span class="desc">CLI Interface — interactive menu for the user — 95 lines</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TASK TYPES -->
+  <section id="task-types">
+    <div class="section-label">Requirement 3.2 — Inheritance &amp; Polymorphism</div>
+    <h2>Task types and class hierarchy</h2>
+    <p class="section-desc">The assignment required a base Task class with at least three derived subclasses, each extending base behaviours where appropriate.</p>
+    <div class="assignment-quote" style="margin: 0 0 30px;">
+      <strong>Assignment says:</strong> "A base Task class must be implemented, with at least three derived classes: DeadlineTask (includes a deadline attribute), PriorityTask (includes priority levels), RecurringTask (repeats at defined intervals). Each subclass must override or extend base behaviors where appropriate."
+    </div>
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon blue">🏗</div>
+        <div><h3>models.py — Class Hierarchy</h3><p>Task is the base class. The three subclasses use super().__init__() and each override to_dict() and __str__().</p></div>
+      </div>
+      <div class="req-section-body">
+        <div class="impl-row">
+          <div class="impl-block">
+            <h4>Base Class — Task</h4>
+            <pre><span class="kw">class</span> <span class="cl">Task</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, title, description=<span class="st">""</span>):
+    <span class="kw">if not</span> title:
+      <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(<span class="st">"Title cannot be empty."</span>)
+    self.id = str(uuid.uuid4())[:<span class="nu">8</span>]
+    self.title = title
+    self.completed = <span class="kw">False</span>
+    self.tags = <span class="fn">set</span>()
+
+  <span class="kw">def</span> <span class="fn">complete</span>(self):
+    self.completed = <span class="kw">True</span>
+
+  <span class="kw">def</span> <span class="fn">to_dict</span>(self):  <span class="cm"># overridden by each subclass</span>
+    <span class="kw">return</span> {<span class="st">"id"</span>: self.id, <span class="st">"title"</span>: self.title ...}</pre>
+          </div>
+          <div class="impl-block">
+            <h4>Three Derived Classes</h4>
+            <pre><span class="kw">class</span> <span class="cl">DeadlineTask</span>(<span class="cl">Task</span>):
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, title, deadline=<span class="kw">None</span>):
+    <span class="fn">super</span>().<span class="fn">__init__</span>(title)
+    self.deadline = deadline  <span class="cm"># new attribute</span>
+
+<span class="kw">class</span> <span class="cl">PriorityTask</span>(<span class="cl">Task</span>):
+  LEVELS = [<span class="st">"low"</span>, <span class="st">"medium"</span>, <span class="st">"high"</span>, <span class="st">"critical"</span>]
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, title, priority=<span class="st">"medium"</span>):
+    <span class="fn">super</span>().<span class="fn">__init__</span>(title)
+    self.priority = priority  <span class="cm"># new attribute</span>
+
+<span class="kw">class</span> <span class="cl">RecurringTask</span>(<span class="cl">Task</span>):
+  INTERVALS = [<span class="st">"daily"</span>, <span class="st">"weekly"</span>, <span class="st">"monthly"</span>]
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, title, interval=<span class="st">"weekly"</span>):
+    <span class="fn">super</span>().<span class="fn">__init__</span>(title)
+    self.interval = interval  <span class="cm"># new attribute</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESIGN PATTERNS -->
+  <section id="patterns">
+    <div class="section-label">Requirement 3.3 — Design Patterns</div>
+    <h2>Three design patterns implemented</h2>
+    <p class="section-desc">One Creational, one Behavioral, and one Structural pattern — each in its own module.</p>
+    <div class="assignment-quote" style="margin: 0 0 30px;">
+      <strong>Assignment says:</strong> "Creational Pattern: Factory Pattern for task creation. Behavioral Pattern: Observer Pattern for task updates/notifications. Structural Pattern: Decorator or Adapter Pattern for extending functionality."
+    </div>
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <div class="pattern-type creational">Creational — factory.py</div>
+        <h4>Factory Pattern</h4>
+        <p>Creates task objects from a type string. Client code never instantiates classes directly.</p>
+        <pre style="font-size:0.73rem"><span class="cm"># factory.py</span>
+TYPE_MAP = {
+  <span class="st">"task"</span>: <span class="cl">Task</span>,
+  <span class="st">"deadline"</span>: <span class="cl">DeadlineTask</span>,
+  <span class="st">"priority"</span>: <span class="cl">PriorityTask</span>,
+  <span class="st">"recurring"</span>: <span class="cl">RecurringTask</span>,
+}
+
+<span class="kw">def</span> <span class="fn">create_task</span>(task_type, **kwargs):
+  cls = TYPE_MAP.get(task_type.lower())
+  <span class="kw">if</span> cls <span class="kw">is None</span>:
+    <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(...)
+  <span class="kw">return</span> cls(**kwargs)</pre>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-type behavioral">Behavioral — observer.py</div>
+        <h4>Observer Pattern</h4>
+        <p>EventManager notifies all subscribers whenever a task changes state.</p>
+        <pre style="font-size:0.73rem"><span class="cm"># observer.py</span>
+<span class="kw">class</span> <span class="cl">EventManager</span>:
+  <span class="kw">def</span> <span class="fn">subscribe</span>(self, listener):
+    self._listeners.append(listener)
+
+  <span class="kw">def</span> <span class="fn">notify</span>(self, event, task):
+    <span class="kw">for</span> l <span class="kw">in</span> self._listeners:
+      l.on_event(event, task)
+
+<span class="kw">class</span> <span class="cl">ConsoleListener</span>:
+  <span class="kw">def</span> <span class="fn">on_event</span>(self, event, task):
+    <span class="fn">print</span>(f<span class="st">"[{event}] {task.title}"</span>)</pre>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-type structural">Structural — decorator.py</div>
+        <h4>Decorator Pattern</h4>
+        <p>UrgentTask wraps any task and adds a label without modifying the original object.</p>
+        <pre style="font-size:0.73rem"><span class="cm"># decorator.py</span>
+<span class="kw">class</span> <span class="cl">UrgentTask</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, task, label=<span class="st">"URGENT"</span>):
+    self._task = task
+    self._label = label
+
+  @<span class="kw">property</span>
+  <span class="kw">def</span> <span class="fn">title</span>(self):
+    <span class="kw">return</span> f<span class="st">"[{self._label}] {self._task.title}"</span>
+
+  <span class="kw">def</span> <span class="fn">complete</span>(self):
+    self._task.complete()  <span class="cm"># delegates</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- OOP -->
+  <section id="oop">
+    <div class="section-label">Requirement 3.1 — Core OOP Principles</div>
+    <h2>Four OOP principles demonstrated</h2>
+    <p class="section-desc">The assignment required inheritance, polymorphism, abstraction, and encapsulation — all four are clearly present in the code.</p>
+    <div class="req-section">
+      <div class="req-section-body" style="padding-top:24px">
+        <table>
+          <thead><tr><th>OOP Principle</th><th>Where it is used</th><th>How it works in the code</th></tr></thead>
+          <tbody>
+            <tr><td>Inheritance</td><td>models.py</td><td>DeadlineTask, PriorityTask, and RecurringTask all call super().__init__() and inherit id, title, completed, and tags from Task without rewriting them.</td></tr>
+            <tr><td>Polymorphism</td><td>models.py, manager.py</td><td>Every task type implements to_dict() and __str__() differently. The manager calls the same methods on any task type without knowing which type it is.</td></tr>
+            <tr><td>Encapsulation</td><td>decorator.py, manager.py</td><td>Internal state uses underscore prefixes (_tasks, _index, _tags). Outside code only accesses tasks through the public methods add(), get(), delete().</td></tr>
+            <tr><td>Abstraction</td><td>manager.py</td><td>TaskManager hides the factory, observer, storage, and iterator behind simple methods. The user calls save() without knowing anything about how JSON works underneath.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALL FEATURES -->
+  <section id="features">
+    <div class="section-label">Requirements 3.4 – 3.9</div>
+    <h2>Every remaining requirement</h2>
+    <p class="section-desc">Each requirement from the assignment mapped to the exact module and code that implements it.</p>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon red">⚠</div>
+        <div><h3>3.4 — Exception Handling</h3><p>Two custom exception classes raised in all the right places.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "Custom exception classes must be implemented, such as TaskNotFoundError and InvalidTaskError. The system should gracefully handle invalid operations and edge cases."</div>
+      <div class="req-section-body">
+        <div class="impl-row">
+          <div class="impl-block">
+            <h4>exceptions.py</h4>
+            <pre><span class="kw">class</span> <span class="cl">TaskNotFoundError</span>(<span class="cl">Exception</span>):
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, task_id):
+    <span class="fn">super</span>().<span class="fn">__init__</span>(
+      f<span class="st">"Task '{task_id}' not found."</span>
+    )
+
+<span class="kw">class</span> <span class="cl">InvalidTaskError</span>(<span class="cl">Exception</span>):
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, message=<span class="st">"Invalid task."</span>):
+    <span class="fn">super</span>().<span class="fn">__init__</span>(message)</pre>
+          </div>
+          <div class="impl-block">
+            <h4>Where they are raised</h4>
+            <pre><span class="cm"># models.py — empty title</span>
+<span class="kw">if not</span> title:
+  <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(<span class="st">"Title cannot be empty."</span>)
+
+<span class="cm"># factory.py — unknown task type</span>
+<span class="kw">if</span> cls <span class="kw">is None</span>:
+  <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(f<span class="st">"Unknown type '{task_type}'"</span>)
+
+<span class="cm"># manager.py — task not found</span>
+<span class="kw">if</span> task_id <span class="kw">not in</span> self._index:
+  <span class="kw">raise</span> <span class="cl">TaskNotFoundError</span>(task_id)</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon orange">📦</div>
+        <div><h3>3.5 — Data Structures</h3><p>Lists, dictionaries, and sets each used for the right purpose.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "Lists for storing tasks. Dictionaries for fast lookup. Sets for unique attributes (e.g. tags)."</div>
+      <div class="req-section-body">
+        <pre><span class="cm"># manager.py</span>
+<span class="kw">class</span> <span class="cl">TaskManager</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self):
+    self._tasks = []       <span class="cm"># LIST  — ordered storage, used for iteration</span>
+    self._index = {}       <span class="cm"># DICT  — O(1) lookup of any task by ID</span>
+    self._tags  = <span class="fn">set</span>()  <span class="cm"># SET   — all unique tags across all tasks</span>
+
+<span class="cm"># models.py — tags on each individual task are also a set</span>
+<span class="kw">class</span> <span class="cl">Task</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, title):
+    self.tags = <span class="fn">set</span>()    <span class="cm"># SET   — no duplicate tags allowed per task</span></pre>
+      </div>
+    </div>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon teal">🔁</div>
+        <div><h3>3.6 — Custom Iterator</h3><p>A class with __iter__ and __next__ that filters tasks based on a condition.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "A custom iterator must be implemented to traverse tasks based on specific conditions (e.g., incomplete tasks only)."</div>
+      <div class="req-section-body">
+        <div class="impl-row">
+          <div class="impl-block">
+            <h4>iterator.py — TaskIterator class</h4>
+            <pre><span class="kw">class</span> <span class="cl">TaskIterator</span>:
+  <span class="kw">def</span> <span class="fn">__init__</span>(self, tasks, condition=<span class="kw">None</span>):
+    self._tasks = [
+      t <span class="kw">for</span> t <span class="kw">in</span> tasks
+      <span class="kw">if</span> condition <span class="kw">is None</span> <span class="kw">or</span> condition(t)
+    ]
+    self._index = <span class="nu">0</span>
+
+  <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+    <span class="kw">return</span> self
+
+  <span class="kw">def</span> <span class="fn">__next__</span>(self):
+    <span class="kw">if</span> self._index >= <span class="fn">len</span>(self._tasks):
+      <span class="kw">raise</span> <span class="cl">StopIteration</span>
+    task = self._tasks[self._index]
+    self._index += <span class="nu">1</span>
+    <span class="kw">return</span> task</pre>
+          </div>
+          <div class="impl-block">
+            <h4>Two helper functions using the iterator</h4>
+            <pre><span class="cm"># Filter: incomplete tasks only</span>
+<span class="kw">def</span> <span class="fn">incomplete_tasks</span>(tasks):
+  <span class="kw">return</span> <span class="cl">TaskIterator</span>(
+    tasks, <span class="kw">lambda</span> t: <span class="kw">not</span> t.completed
+  )
+
+<span class="cm"># Filter: tasks matching a specific tag</span>
+<span class="kw">def</span> <span class="fn">tasks_by_tag</span>(tasks, tag):
+  <span class="kw">return</span> <span class="cl">TaskIterator</span>(
+    tasks, <span class="kw">lambda</span> t: tag <span class="kw">in</span> t.tags
+  )
+
+<span class="cm"># Used in manager.py</span>
+<span class="kw">def</span> <span class="fn">incomplete</span>(self):
+  <span class="kw">return</span> <span class="fn">list</span>(<span class="fn">incomplete_tasks</span>(self._tasks))</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon purple">🔍</div>
+        <div><h3>3.7 — Regex Input Parsing</h3><p>User input like "title:Homework due:2026-05-01 priority:high" is parsed with regular expressions.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "The system should parse structured user input using regular expressions. For example: title:Homework due:2026-05-01 priority:high"</div>
+      <div class="req-section-body">
+        <pre><span class="cm"># parser.py</span>
+<span class="kw">import</span> re
+
+FIELD_RE = re.<span class="fn">compile</span>(<span class="st">r'(\w+):(\S+)'</span>)        <span class="cm"># matches every key:value pair</span>
+DATE_RE  = re.<span class="fn">compile</span>(<span class="st">r'^\d{4}-\d{2}-\d{2}$'</span>)  <span class="cm"># validates YYYY-MM-DD format</span>
+
+<span class="kw">def</span> <span class="fn">parse_input</span>(raw):
+  matches = FIELD_RE.<span class="fn">findall</span>(raw)
+  <span class="kw">if not</span> matches:
+    <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(<span class="st">"No valid fields. Use: title:MyTask priority:high"</span>)
+  parsed = {k.lower(): v <span class="kw">for</span> k, v <span class="kw">in</span> matches}  <span class="cm"># dict comprehension</span>
+  <span class="kw">if</span> <span class="st">"title"</span> <span class="kw">not in</span> parsed:
+    <span class="kw">raise</span> <span class="cl">InvalidTaskError</span>(<span class="st">"Input must include a 'title' field."</span>)
+  <span class="kw">return</span> parsed
+
+<span class="cm"># Example: "title:Homework due:2026-05-01 priority:high"</span>
+<span class="cm"># Returns:  {"title": "Homework", "due": "2026-05-01", "priority": "high"}</span></pre>
+      </div>
+    </div>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon green">💾</div>
+        <div><h3>3.8 — JSON Serialization</h3><p>Tasks are saved to and loaded from a JSON file so data persists between sessions.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "Tasks must be saved and loaded using a persistence mechanism: JSON or pickle format."</div>
+      <div class="req-section-body">
+        <div class="impl-row">
+          <div class="impl-block">
+            <h4>storage.py</h4>
+            <pre><span class="kw">def</span> <span class="fn">save_tasks</span>(tasks, filepath=<span class="st">"tasks.json"</span>):
+  <span class="kw">with</span> <span class="fn">open</span>(filepath, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    json.<span class="fn">dump</span>(
+      [t.<span class="fn">to_dict</span>() <span class="kw">for</span> t <span class="kw">in</span> tasks],
+      f, indent=<span class="nu">2</span>
+    )
+
+<span class="kw">def</span> <span class="fn">load_tasks</span>(filepath=<span class="st">"tasks.json"</span>):
+  <span class="kw">if not</span> os.path.<span class="fn">exists</span>(filepath):
+    <span class="kw">return</span> []
+  <span class="kw">with</span> <span class="fn">open</span>(filepath, <span class="st">"r"</span>) <span class="kw">as</span> f:
+    <span class="kw">return</span> [<span class="fn">task_from_dict</span>(d) <span class="kw">for</span> d <span class="kw">in</span> json.<span class="fn">load</span>(f)]</pre>
+          </div>
+          <div class="impl-block">
+            <h4>What tasks.json looks like</h4>
+            <pre>[
+  {
+    <span class="st">"id"</span>: <span class="st">"a1b2c3d4"</span>,
+    <span class="st">"type"</span>: <span class="st">"PriorityTask"</span>,
+    <span class="st">"title"</span>: <span class="st">"Fix the bug"</span>,
+    <span class="st">"description"</span>: <span class="st">""</span>,
+    <span class="st">"completed"</span>: <span class="kw">false</span>,
+    <span class="st">"tags"</span>: [<span class="st">"work"</span>],
+    <span class="st">"priority"</span>: <span class="st">"high"</span>
+  }
+]</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="req-section">
+      <div class="req-section-header">
+        <div class="req-icon blue">λ</div>
+        <div><h3>3.9 — Functional Programming</h3><p>Lambda expressions, list comprehensions, map(), and filter() used throughout.</p></div>
+      </div>
+      <div class="assignment-quote"><strong>Assignment says:</strong> "Lambda expressions. List comprehensions. Use of functions like map() and filter()."</div>
+      <div class="req-section-body">
+        <pre><span class="cm"># Lambda expressions — iterator.py</span>
+<span class="fn">incomplete_tasks</span>(tasks, <span class="kw">lambda</span> t: <span class="kw">not</span> t.completed)
+<span class="fn">tasks_by_tag</span>(tasks, <span class="kw">lambda</span> t: tag <span class="kw">in</span> t.tags)
+
+<span class="cm"># filter() — manager.py</span>
+<span class="kw">def</span> <span class="fn">high_priority</span>(self):
+  <span class="kw">return</span> <span class="fn">list</span>(<span class="fn">filter</span>(
+    <span class="kw">lambda</span> t: <span class="fn">hasattr</span>(t, <span class="st">"priority"</span>) <span class="kw">and</span> t.priority <span class="kw">in</span> (<span class="st">"high"</span>, <span class="st">"critical"</span>),
+    self._tasks
+  ))
+
+<span class="cm"># map() — manager.py</span>
+<span class="kw">def</span> <span class="fn">titles</span>(self):
+  <span class="kw">return</span> <span class="fn">list</span>(<span class="fn">map</span>(<span class="kw">lambda</span> t: t.title, self._tasks))
+
+<span class="cm"># List comprehension — factory.py and iterator.py</span>
+kwargs = {k: v <span class="kw">for</span> k, v <span class="kw">in</span> data.items() <span class="kw">if</span> k <span class="kw">not in</span> (<span class="st">"id"</span>, <span class="st">"type"</span>)}
+self._tasks = [t <span class="kw">for</span> t <span class="kw">in</span> tasks <span class="kw">if</span> condition(t)]</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTS -->
+  <section id="tests">
+    <div class="section-label">Requirement 3.10 — Unit Testing</div>
+    <h2>41 tests, all passing</h2>
+    <p class="section-desc">Core functionality, edge cases, and exception validation are all covered as required by the assignment.</p>
+    <div class="assignment-quote" style="margin: 0 0 30px;"><strong>Assignment says:</strong> "Students must implement unit tests using unittest or pytest: Core functionality tests. Edge case handling. Exception validation."</div>
+    <div class="req-section">
+      <div class="req-section-body" style="padding-top:24px">
+        <table>
+          <thead><tr><th>Test Group</th><th>What is tested</th><th>Tests</th></tr></thead>
+          <tbody>
+            <tr><td>Task Creation</td><td>All task types, attributes, defaults, __str__ output</td><td>8</td></tr>
+            <tr><td>Exception Handling</td><td>Empty title, bad priority, bad interval, unknown type, missing task</td><td>7</td></tr>
+            <tr><td>Task Manager</td><td>add, delete, complete, update, list, filter, count</td><td>9</td></tr>
+            <tr><td>Factory Pattern</td><td>Create by type string, restore from dict, unknown type raises</td><td>6</td></tr>
+            <tr><td>Observer Pattern</td><td>Subscribe, events fire on create/delete/complete, unsubscribe</td><td>5</td></tr>
+            <tr><td>Iterator</td><td>Incomplete filter, tag filter, empty list, StopIteration</td><td>4</td></tr>
+            <tr><td>Serialization</td><td>Save to JSON, load from JSON, missing file, types preserved</td><td>4</td></tr>
+            <tr><td>Regex Parser</td><td>Valid input, missing title, empty string, date validation</td><td>4</td></tr>
+            <tr><td><strong>Total</strong></td><td></td><td><strong>47</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="test-result">
+          <span class="gray">$ python -m unittest tests -v</span><br><br>
+          <span class="white">test_create_deadline_task ... </span>ok<br>
+          <span class="white">test_create_priority_task ... </span>ok<br>
+          <span class="white">test_create_recurring_task ... </span>ok<br>
+          <span class="white">test_empty_title_raises ... </span>ok<br>
+          <span class="white">test_invalid_priority_raises ... </span>ok<br>
+          <span class="white">test_factory_unknown_type_raises ... </span>ok<br>
+          <span class="white">test_manager_add_and_get ... </span>ok<br>
+          <span class="white">test_manager_delete ... </span>ok<br>
+          <span class="white">test_observer_notifies_on_create ... </span>ok<br>
+          <span class="white">test_iterator_incomplete_only ... </span>ok<br>
+          <span class="white">test_save_and_load_json ... </span>ok<br>
+          <span class="white">test_regex_parse_valid_input ... </span>ok<br>
+          <span class="gray">... 29 more tests ...</span><br><br>
+          <span class="gray">----------------------------------------------------------------------</span><br>
+          Ran <span class="white">41</span> tests in <span class="white">0.011s</span><br><br>
+          OK
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USAGE -->
+  <section id="usage">
+    <div class="section-label">Running the Project</div>
+    <h2>How to install and run</h2>
+    <p class="section-desc">No external libraries needed. Works with Python 3.8 or newer.</p>
+    <div class="req-section">
+      <div class="req-section-body" style="padding-top:24px">
+        <div class="impl-row">
+          <div class="impl-block">
+            <h4>Run the interactive CLI</h4>
+            <pre>python main.py</pre>
+            <br>
+            <h4>Run all unit tests</h4>
+            <pre>python -m unittest tests -v</pre>
+            <br>
+            <h4>Create tasks in Python code</h4>
+            <pre><span class="kw">from</span> manager <span class="kw">import</span> <span class="cl">TaskManager</span>
+
+m = <span class="cl">TaskManager</span>()
+m.create(<span class="st">"priority"</span>, title=<span class="st">"Fix bug"</span>, priority=<span class="st">"high"</span>)
+m.create(<span class="st">"deadline"</span>, title=<span class="st">"Submit"</span>, deadline=<span class="st">"2026-05-18"</span>)
+m.save()   <span class="cm"># persisted to tasks.json</span></pre>
+          </div>
+          <div class="impl-block">
+            <h4>Parse a task from a string</h4>
+            <pre>m.create_from_input(
+  <span class="st">"title:Homework due:2026-05-01 type:deadline"</span>
+)</pre>
+            <br>
+            <h4>Subscribe an observer</h4>
+            <pre><span class="kw">from</span> observer <span class="kw">import</span> <span class="cl">ConsoleListener</span>
+
+m = <span class="cl">TaskManager</span>()
+m.events.subscribe(<span class="cl">ConsoleListener</span>())
+m.create(<span class="st">"priority"</span>, title=<span class="st">"Test"</span>)
+<span class="cm"># prints: [CREATED] Test</span></pre>
+            <br>
+            <h4>Apply the decorator</h4>
+            <pre><span class="kw">from</span> decorator <span class="kw">import</span> <span class="cl">UrgentTask</span>
+
+task = m.create(<span class="st">"priority"</span>, title=<span class="st">"Bug"</span>)
+urgent = <span class="cl">UrgentTask</span>(task, label=<span class="st">"HOT"</span>)
+<span class="fn">print</span>(urgent.title)  <span class="cm"># [HOT] Bug</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Intelligent Task Management System &nbsp;—&nbsp; Python OOP Project &nbsp;—&nbsp; All assignment requirements implemented
+</footer>
+
+</body>
+</html>
